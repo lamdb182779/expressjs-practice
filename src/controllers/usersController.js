@@ -1,34 +1,75 @@
 require('dotenv').config()
+const { query } = require('../config/db/connect.js')
 const connection = require('../config/db/connect.js')
 
 const PAGE_SIZE = parseInt(process.env.PAGE_SIZE)
 
 // Get data of all users from database
 let getAllUsers = (req, res) => {
-    let page = req.query.page
-    if (page){
-        let skip = (page - 1) * PAGE_SIZE
-        let limit = skip + PAGE_SIZE
-        connection.query(
-            'SELECT * FROM `USERS` WHERE `id` > ' + skip + ' AND `id` <= ' + limit,
-            function(err, results, fields) {
-                return res.status(200).json({
-                    message: 'ok',
-                    data: results
-                })
-            }
-          );
-    } else {
-        connection.query(
-            'SELECT * FROM `USERS`',
-            function(err, results, fields) {
-                return res.status(200).json({
-                    message: 'ok',
-                    data: results
-                })
-            }
-          );
+    let { page, gender, age } = req.query
+
+    if (!page) {
+        page = 1
     }
+
+    let skip = (page - 1) * PAGE_SIZE
+
+    //Don't use filter
+    if (!gender && !age) {
+        let query = 'SELECT * FROM `USERS` LIMIT ' + skip + ', ' + PAGE_SIZE
+        connection.query(
+            query,
+            function(err, results, fields) {
+                return res.status(200).json({
+                    message: 'ok',
+                    data: results
+                })
+            }
+        );
+    }
+
+    //Only filter by age
+    else if(!gender) {
+        let query = 'SELECT * FROM `USERS` WHERE `age` = ' + age + ' LIMIT ' + skip + ', ' + PAGE_SIZE
+        connection.query(
+            query,
+            function(err, results, fields) {
+                return res.status(200).json({
+                    message: 'ok',
+                    data: results
+                })
+            }
+        );
+    }
+
+    //Only filter by gender
+    else if(!age) {
+        let query = 'SELECT * FROM `USERS` WHERE `gender` = \'' + gender +'\' LIMIT ' + skip + ', ' + PAGE_SIZE
+        connection.query(
+            query,
+            function(err, results, fields) {
+                return res.status(200).json({
+                    message: 'ok',
+                    data: results
+                })
+            }
+        );
+    }
+    
+    //Filter by gender and age
+    else {   
+        let query =  'SELECT * FROM `USERS` WHERE `age` = ' + age +' AND `gender` = \'' + gender +'\' LIMIT ' + skip + ', ' + PAGE_SIZE
+        console.log(query)
+        connection.query(
+            query,
+            function(err, results, fields) {
+                return res.status(200).json({
+                    message: 'ok',
+                    data: results
+                })
+            }
+        );
+    }    
 }
 
 //Get data of a user from database by id
