@@ -1,16 +1,34 @@
+require('dotenv').config()
 const connection = require('../config/db/connect.js')
+
+const PAGE_SIZE = parseInt(process.env.PAGE_SIZE)
 
 // Get data of all users from database
 let getAllUsers = (req, res) => {
-    connection.query(
-        'SELECT * FROM `USERS`',
-        function(err, results, fields) {
-            return res.status(200).json({
-                message: 'ok',
-                data: results
-            })
-        }
-      );
+    let page = req.query.page
+    if (page){
+        let skip = (page - 1) * PAGE_SIZE
+        let limit = skip + PAGE_SIZE
+        connection.query(
+            'SELECT * FROM `USERS` WHERE `id` > ' + skip + ' AND `id` <= ' + limit,
+            function(err, results, fields) {
+                return res.status(200).json({
+                    message: 'ok',
+                    data: results
+                })
+            }
+          );
+    } else {
+        connection.query(
+            'SELECT * FROM `USERS`',
+            function(err, results, fields) {
+                return res.status(200).json({
+                    message: 'ok',
+                    data: results
+                })
+            }
+          );
+    }
 }
 
 //Get data of a user from database by id

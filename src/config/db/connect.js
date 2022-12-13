@@ -16,7 +16,7 @@ const connection = mysql.createConnection({
 
 // simple query
 connection.query(
-    'SELECT * FROM `USERS`',
+    'SELECT * FROM `USERS` WHERE `id` <= 10',
     function(err, results, fields) {
       console.log(results); // results contains rows returned by server
     }
