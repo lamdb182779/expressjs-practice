@@ -41,6 +41,9 @@ let updateUser = async (req, res) => {
             message: 'missing required param'
         })
     }
+    if(!avatar) {
+        avatar = null
+    }
     await connection.execute(
         'UPDATE `USERS` SET `name` = ?, `age` = ?, `gender` = ?, `address` = ?, `avatar` = ? WHERE `id` = ?',
         [ name, age, gender, address, avatar, id ]
@@ -73,6 +76,9 @@ let createUser = async (req, res) => {
         return res.status(200).json({
             message: 'missing required param'
         })
+    }
+    if(!avatar) {
+        avatar = null
     }
     await connection.execute(
         'INSERT INTO `USERS` (`name`, `age`, `gender`, `address`, `avatar`) VALUES (?, ?, ?, ?, ?)',
