@@ -2,16 +2,36 @@ require('dotenv').config()
 const { Sequelize, Op } = require('sequelize');
 const user = require('../model/user.js')
 
-const PAGE_SIZE = parseInt(process.env.PAGE_SIZE)
 
 //Get all the data of the users from the database
 let getAllUsers = async(req, res) => {
-    let { page, name, age, gender, address } = req.query
+    let { page, pagesize, name, age, gender, address } = req.query
+
+    pagesize = parseInt(pagesize)
+    if (!pagesize) {
+        pagesize = 10
+    }
+
+    if (pagesize > 100) {
+        pagesize = 100
+    }
+
     if (!page) {
         page = 1
     }
+    try {
+        let count = await user.count()
+        if (page > ( count - 1 )/ pagesize + 1) {
+            page = parseInt(( count - 1 )/ pagesize + 1)
+        }
+    } catch(err) {
+        console.log('Cannot count. Error: ', err)
+        return res.status(500).json({
+            message: 'server error',
+        })
+    }
 
-    let skip = (page - 1) * PAGE_SIZE
+    let skip = (page - 1) * pagesize
     
     //Structure data need to find
     let find = new Object();
@@ -32,11 +52,12 @@ let getAllUsers = async(req, res) => {
         }
     }
 
+    //
     try {
         let data = await user.findAll({
             where: find,
             offset: skip,
-            limit: PAGE_SIZE
+            limit: pagesize
         })
 
         return res.status(200).json({
@@ -44,18 +65,32 @@ let getAllUsers = async(req, res) => {
             data: data
         })
     } catch (err) {
-        console.log(err)
+        console.log('Cannot get data. Error:', err)
+        return res.status(500).json({
+            message: 'server error',
+        })
     }
-
-    
 }
 
 
 //Get the data of a user from database by id
 let getUserById = async(req, res) => {
-    let id = req.params.id
+    let id = req.query.id
+    try {
+        let count = await user.count()
+        if (id > count || id <= 0) {
+            return res.status(404).json({
+                message: 'data not found',
+            })
+        }
+    } catch(err) {
+        console.log('Cannot count. Error: ', err)
+        return res.status(500).json({
+            message: 'server error',
+        })
+    }
     if(!id) {
-        return res.status(200).json({
+        return res.status(400).json({
             message: 'missing required param'
         })
     }
@@ -66,7 +101,10 @@ let getUserById = async(req, res) => {
             data: data
         })
     } catch (err) {
-        console.log(err)
+        console.log('Cannot get data. Error:', err)
+        return res.status(500).json({
+            message: 'server error',
+        })
     }
 }
 
@@ -74,8 +112,21 @@ let getUserById = async(req, res) => {
 let updateUser = async (req, res) => {
     let { name, age, gender, address, avatar, id } = req.body;
     if(!id) {
-        return res.status(200).json({
+        return res.status(400).json({
             message: 'missing required param'
+        })
+    }
+    try {
+        let count = await user.count()
+        if (id > count || id <= 0) {
+            return res.status(404).json({
+                message: 'data not found',
+            })
+        }
+    } catch(err) {
+        console.log('Cannot count. Error: ', err)
+        return res.status(500).json({
+            message: 'server error',
         })
     }
     try {
@@ -101,15 +152,31 @@ let updateUser = async (req, res) => {
             data: data
         })
     } catch (err) {
-        console.log(err)
+        console.log('Cannot update data. Error:', err)
+        return res.status(500).json({
+            message: 'server error',
+        })
     }
 }
 
 // Delete the data of a user by id
 let deleteUserById = async (req, res) => {
-    let id = req.params.id
+    let id = req.query.id
+    try {
+        let count = await user.count()
+        if (id > count || id <= 0) {
+            return res.status(404).json({
+                message: 'data not found',
+            })
+        }
+    } catch(err) {
+        console.log('Cannot count. Error: ', err)
+        return res.status(500).json({
+            message: 'server error',
+        })
+    }
     if(!id) {
-        return res.status(200).json({
+        return res.status(400).json({
             message: 'missing required param'
         })
     }
@@ -120,7 +187,10 @@ let deleteUserById = async (req, res) => {
             message: 'ok'
         })
     } catch (err) {
-        console.log(err)
+        console.log('Cannot delete data. Error:', err)
+        return res.status(500).json({
+            message: 'server error',
+        })
     }
 } 
 
@@ -128,7 +198,7 @@ let deleteUserById = async (req, res) => {
 let createUser = async (req, res) => {
     let { name, age, gender, address, avatar } = req.body;
     if(!name || !age || !gender || !address) {
-        return res.status(200).json({
+        return res.status(400).json({
             message: 'missing required param'
         })
     }
@@ -145,7 +215,10 @@ let createUser = async (req, res) => {
             data: data
         })
     } catch (err) {
-        console.log(err)
+        console.log('Cannot create data. Error:', err)
+        return res.status(500).json({
+            message: 'server error',
+        })
     }
 }
 
