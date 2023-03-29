@@ -1,11 +1,4 @@
--- phpMyAdmin SQL Dump
--- version 5.2.0
--- https://www.phpmyadmin.net/
---
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th12 13, 2022 lúc 07:27 AM
--- Phiên bản máy phục vụ: 10.4.27-MariaDB
--- Phiên bản PHP: 8.1.12
+
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -1061,9 +1054,7 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT cho bảng `users`
 --
-ALTER TABLE `users`
-  MODIFY `id` int(5) NOT '' AUTO_INCREMENT, AUTO_INCREMENT=12;
-COMMIT;
+ALTER TABLE `users` CHANGE `id` `id` INT(5) NOT NULL AUTO_INCREMENT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
